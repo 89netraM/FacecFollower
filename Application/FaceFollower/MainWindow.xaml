@@ -14,14 +14,7 @@
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<Image x:Name="image" SizeChanged="image_SizeChanged" />
-		<Canvas x:Name="canvas" HorizontalAlignment="Center">
-			<Rectangle
-				x:Name="faceRect"
-				Stroke="Red"
-				StrokeThickness="5"
-				Visibility="Hidden" />
-		</Canvas>
+		<Image x:Name="image" />
 		<StackPanel
 			Grid.Row="1"
 			HorizontalAlignment="Right"
