@@ -14,16 +14,27 @@
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<Image x:Name="image" />
+		<Image x:Name="image" SizeChanged="image_SizeChanged" />
+		<Canvas x:Name="canvas" HorizontalAlignment="Center">
+			<Rectangle
+				x:Name="faceRect"
+				Stroke="Red"
+				StrokeThickness="5"
+				Visibility="Hidden" />
+		</Canvas>
 		<StackPanel
 			Grid.Row="1"
 			HorizontalAlignment="Right"
 			Orientation="Horizontal">
 			<TextBlock
+				x:Name="status"
 				Margin="0,0,10,0"
 				VerticalAlignment="Center"
-				Text="Status: Beep boop" />
-			<Button Padding="2" Content="Start/Stop" />
+				Text="Status: Stopped" />
+			<Button
+				Padding="2"
+				Click="StartStop_Click"
+				Content="Start/Stop" />
 		</StackPanel>
 	</Grid>
 </Window>
