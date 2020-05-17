@@ -19,7 +19,6 @@ using System.Windows.Navigation;
 using System.Windows.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using Point = System.Drawing.Point;
 
 namespace FaceFollower
 {
@@ -32,7 +31,7 @@ namespace FaceFollower
 		private readonly CascadeClassifier[] detectors;
 		private readonly Mat frame = new Mat();
 
-		private readonly LimitedQueue<Rectangle> previousFrames = new LimitedQueue<Rectangle>(5);
+		private Rectangle? previousFace = null;
 
 		private bool faceDetectionRunning = false;
 
@@ -68,13 +67,12 @@ namespace FaceFollower
 
 					if (faces.Count > 0)
 					{
-						previousFrames.Enqueue(MeanFace(faces));
+						previousFace = MeanFace(faces);
 					}
 
-					if (previousFrames.Count > 0)
+					if (previousFace is Rectangle face)
 					{
-						Rectangle meanFace = MeanFace(previousFrames);
-						imageFrame.Draw(meanFace, new Bgr(faces.Count > 0 ? System.Drawing.Color.Green : System.Drawing.Color.Red), 2);
+						imageFrame.Draw(face, new Bgr(faces.Count > 0 ? System.Drawing.Color.Green : System.Drawing.Color.Red), 2);
 					}
 				}
 
