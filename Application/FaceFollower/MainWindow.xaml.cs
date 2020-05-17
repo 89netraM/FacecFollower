@@ -19,6 +19,7 @@ using System.Windows.Navigation;
 using System.Windows.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using Point = System.Drawing.Point;
 
 namespace FaceFollower
 {
@@ -30,6 +31,8 @@ namespace FaceFollower
 		private readonly VideoCapture videoSource;
 		private readonly CascadeClassifier[] detectors;
 		private readonly Mat frame = new Mat();
+
+		private readonly LimitedQueue<Rectangle> previousFrames = new LimitedQueue<Rectangle>(5);
 
 		private bool faceDetectionRunning = false;
 
@@ -63,9 +66,15 @@ namespace FaceFollower
 						faces.AddRange(detectors[i].DetectMultiScale(grayFrame, 1.3, 5));
 					}
 
-					foreach (Rectangle face in faces)
+					if (faces.Count > 0)
 					{
-						imageFrame.Draw(face, new Bgr(System.Drawing.Color.Red), 2);
+						previousFrames.Enqueue(MeanFace(faces));
+					}
+
+					if (previousFrames.Count > 0)
+					{
+						Rectangle meanFace = MeanFace(previousFrames);
+						imageFrame.Draw(meanFace, new Bgr(faces.Count > 0 ? System.Drawing.Color.Green : System.Drawing.Color.Red), 2);
 					}
 				}
 
@@ -111,6 +120,20 @@ namespace FaceFollower
 			videoSource.Stop();
 
 			base.OnClosed(e);
+		}
+
+		private Rectangle MeanFace(IEnumerable<Rectangle> faces)
+		{
+			int top = faces.Min(f => f.Top);
+			int left = faces.Min(f => f.Left);
+			int right = faces.Max(f => f.Right);
+			int bottom = faces.Max(f => f.Bottom);
+
+			double x = (left + right) / 2.0d;
+			double y = (top + bottom) / 2.0d;
+
+			List<Rectangle> sorted = faces.OrderBy(f => Math.Sqrt(Math.Pow((f.Left + f.Width / 2.0d) - x, 2) + Math.Pow((f.Top + f.Height / 2.0d) - y, 2))).ToList();
+			return sorted[sorted.Count / 2];
 		}
 	}
 }
