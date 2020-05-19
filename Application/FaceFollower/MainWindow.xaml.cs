@@ -17,8 +17,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+using AForge.Robotics.Lego;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using static AForge.Robotics.Lego.NXTBrick;
 
 namespace FaceFollower
 {
@@ -30,6 +32,8 @@ namespace FaceFollower
 		private readonly VideoCapture videoSource;
 		private readonly CascadeClassifier[] detectors;
 		private readonly Mat frame = new Mat();
+
+		private readonly NXTBrick nxtBrick = new NXTBrick();
 
 		private Rectangle? previousFace = null;
 
@@ -73,6 +77,23 @@ namespace FaceFollower
 					if (previousFace is Rectangle face)
 					{
 						imageFrame.Draw(face, new Bgr(faces.Count > 0 ? System.Drawing.Color.Green : System.Drawing.Color.Red), 2);
+
+						double x = -(face.X + face.Width / 2 - imageFrame.Width / 2) / (double)(imageFrame.Width / 2);
+						double y = -(face.Y + face.Height / 2 - imageFrame.Height / 2) / (double)(imageFrame.Height / 2);
+
+						this.Dispatcher.Invoke(() =>
+						{
+							SetStatus($"Running: ({x:0.00}, {y:0.00})");
+						});
+
+						if (nxtBrick.IsConnected && faces.Count > 0)
+						{
+							CorrectAim(x, y);
+						}
+						else
+						{
+							StopAim();
+						}
 					}
 				}
 
@@ -113,8 +134,51 @@ namespace FaceFollower
 			status.Text = $"Status {DateTime.Now:hh:mm:ss}: {msg}";
 		}
 
+		private void ConnectDissconnect_Click(object sender, RoutedEventArgs e)
+		{
+			nxtCOM.IsEnabled = false;
+			string nxtCOMAddr = nxtCOM.Text;
+			Task.Run(() => ToggleConnection(nxtCOMAddr));
+		}
+
+		private void ToggleConnection(string nxtCOMAddr)
+		{
+			bool success = false;
+			if (nxtBrick.IsConnected)
+			{
+				StopAim();
+				nxtBrick.Disconnect();
+				success = true;
+			}
+			else
+			{
+				if (nxtBrick.Connect(nxtCOMAddr))
+				{
+					nxtBrick.PlayTone(500, 500);
+					success = true;
+				}
+			}
+
+			bool isConnected = nxtBrick.IsConnected;
+			this.Dispatcher.Invoke(() =>
+			{
+				if (success)
+				{
+					ConnectDissconnect.Content = isConnected ? "Dissconnect" : "Connect";
+				}
+				else
+				{
+					MessageBox.Show($"Couldn't {(isConnected ? "dissconnect" : "connect")} to the NXT brick.", "Error");
+				}
+
+				nxtCOM.IsEnabled = !isConnected;
+			});
+		}
+
 		protected override void OnClosed(EventArgs e)
 		{
+			StopAim();
+			nxtBrick.Disconnect();
 			videoSource.Stop();
 
 			base.OnClosed(e);
@@ -132,6 +196,46 @@ namespace FaceFollower
 
 			List<Rectangle> sorted = faces.OrderBy(f => Math.Sqrt(Math.Pow((f.Left + f.Width / 2.0d) - x, 2) + Math.Pow((f.Top + f.Height / 2.0d) - y, 2))).ToList();
 			return sorted[sorted.Count / 2];
+		}
+
+		private void CorrectAim(double x, double y)
+		{
+			CorrectVerticalAim(y);
+		}
+
+		private void CorrectVerticalAim(double y)
+		{
+			MotorState state = new MotorState();
+			if (Math.Abs(y) < 0.35)
+			{
+				state.Mode = MotorMode.None;
+				state.RunState = MotorRunState.Idle;
+			}
+			else
+			{
+				state.Mode = MotorMode.On;
+				state.RunState = MotorRunState.Running;
+				state.TachoLimit = 250;
+				state.Power = y > 0 ? 62 : -64;
+				state.TurnRatio = 80;
+			}
+
+			if (nxtBrick.IsConnected)
+			{
+				nxtBrick.SetMotorState(Motor.B, state);
+			}
+		}
+
+		private void StopAim()
+		{
+			MotorState state = new MotorState();
+			state.Mode = MotorMode.None;
+			state.RunState = MotorRunState.Idle;
+
+			if (nxtBrick.IsConnected)
+			{
+				nxtBrick.SetMotorState(Motor.All, state, true);
+			}
 		}
 	}
 }

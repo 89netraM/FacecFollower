@@ -20,6 +20,21 @@
 			HorizontalAlignment="Right"
 			Orientation="Horizontal">
 			<TextBlock
+				Margin="0,0,10,0"
+				VerticalAlignment="Center"
+				Text="NXT COM:" />
+			<TextBox
+				x:Name="nxtCOM"
+				Width="100"
+				VerticalAlignment="Center"
+				Text="COM6" />
+			<Button
+				x:Name="ConnectDissconnect"
+				Margin="0,0,100,0"
+				Padding="2"
+				Click="ConnectDissconnect_Click"
+				Content="Connect" />
+			<TextBlock
 				x:Name="status"
 				Margin="0,0,10,0"
 				VerticalAlignment="Center"
