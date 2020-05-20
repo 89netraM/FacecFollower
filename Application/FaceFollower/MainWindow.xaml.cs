@@ -89,17 +89,14 @@ namespace FaceFollower
 
 						if (isConnected)
 						{
-							Task.Run(() =>
+							if (faces.Count > 0)
 							{
-								if (faces.Count > 0)
-								{
-									CorrectAim(x, y);
-								}
-								else
-								{
-									StopAim();
-								}
-							});
+								CorrectAim(x, y);
+							}
+							else
+							{
+								StopAim();
+							}
 						}
 					}
 				}
