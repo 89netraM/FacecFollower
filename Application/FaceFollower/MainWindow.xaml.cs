@@ -34,6 +34,7 @@ namespace FaceFollower
 		private readonly Mat frame = new Mat();
 
 		private readonly NXTBrick nxtBrick = new NXTBrick();
+		private bool isConnected = false;
 
 		private Rectangle? previousFace = null;
 
@@ -86,13 +87,16 @@ namespace FaceFollower
 							SetStatus($"Running: ({x:0.00}, {y:0.00})");
 						});
 
-						if (nxtBrick.IsConnected && faces.Count > 0)
+						if (isConnected)
 						{
-							CorrectAim(x, y);
-						}
-						else
-						{
-							StopAim();
+							if (faces.Count > 0)
+							{
+								CorrectAim(x, y);
+							}
+							else
+							{
+								StopAim();
+							}
 						}
 					}
 				}
@@ -137,6 +141,7 @@ namespace FaceFollower
 		private void ConnectDissconnect_Click(object sender, RoutedEventArgs e)
 		{
 			nxtCOM.IsEnabled = false;
+			ConnectDissconnect.IsEnabled = false;
 			string nxtCOMAddr = nxtCOM.Text;
 			Task.Run(() => ToggleConnection(nxtCOMAddr));
 		}
@@ -144,7 +149,7 @@ namespace FaceFollower
 		private void ToggleConnection(string nxtCOMAddr)
 		{
 			bool success = false;
-			if (nxtBrick.IsConnected)
+			if (isConnected)
 			{
 				StopAim();
 				nxtBrick.Disconnect();
@@ -159,7 +164,7 @@ namespace FaceFollower
 				}
 			}
 
-			bool isConnected = nxtBrick.IsConnected;
+			isConnected = nxtBrick.IsConnected;
 			this.Dispatcher.Invoke(() =>
 			{
 				if (success)
@@ -172,6 +177,7 @@ namespace FaceFollower
 				}
 
 				nxtCOM.IsEnabled = !isConnected;
+				ConnectDissconnect.IsEnabled = true;
 			});
 		}
 
