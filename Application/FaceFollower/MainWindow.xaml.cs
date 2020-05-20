@@ -206,7 +206,34 @@ namespace FaceFollower
 
 		private void CorrectAim(double x, double y)
 		{
+			CorrectHorizontalAim(x);
 			CorrectVerticalAim(y);
+		}
+
+		private void CorrectHorizontalAim(double x)
+		{
+			MotorState state = new MotorState();
+			if (Math.Abs(x) < 0.35)
+			{
+				state.Mode = MotorMode.On | MotorMode.Brake;
+				state.RunState = MotorRunState.Running;
+				state.TachoLimit = 0;
+				state.Power = 0;
+				state.TurnRatio = 80;
+			}
+			else
+			{
+				state.Mode = MotorMode.On | MotorMode.Brake;
+				state.RunState = MotorRunState.Running;
+				state.TachoLimit = 250;
+				state.Power = Math.Sign(x) * 20;
+				state.TurnRatio = 80;
+			}
+
+			if (nxtBrick.IsConnected)
+			{
+				nxtBrick.SetMotorState(Motor.C, state);
+			}
 		}
 
 		private void CorrectVerticalAim(double y)
@@ -214,15 +241,18 @@ namespace FaceFollower
 			MotorState state = new MotorState();
 			if (Math.Abs(y) < 0.35)
 			{
-				state.Mode = MotorMode.None;
+				state.Mode = MotorMode.On | MotorMode.Brake;
 				state.RunState = MotorRunState.Idle;
+				state.TachoLimit = 0;
+				state.Power = 0;
+				state.TurnRatio = 80;
 			}
 			else
 			{
-				state.Mode = MotorMode.On;
+				state.Mode = MotorMode.On | MotorMode.Brake;
 				state.RunState = MotorRunState.Running;
 				state.TachoLimit = 250;
-				state.Power = y > 0 ? 62 : -64;
+				state.Power = Math.Sign(y) * 15;
 				state.TurnRatio = 80;
 			}
 
@@ -235,8 +265,11 @@ namespace FaceFollower
 		private void StopAim()
 		{
 			MotorState state = new MotorState();
-			state.Mode = MotorMode.None;
-			state.RunState = MotorRunState.Idle;
+			state.Mode = MotorMode.On | MotorMode.Brake;
+			state.RunState = MotorRunState.Running;
+			state.TachoLimit = 0;
+			state.Power = 0;
+			state.TurnRatio = 80;
 
 			if (nxtBrick.IsConnected)
 			{
