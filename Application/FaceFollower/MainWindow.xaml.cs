@@ -226,7 +226,7 @@ namespace FaceFollower
 				state.Mode = MotorMode.On | MotorMode.Brake;
 				state.RunState = MotorRunState.Running;
 				state.TachoLimit = 250;
-				state.Power = Math.Sign(x) * 20;
+				state.Power = Math.Sign(x) * 30;
 				state.TurnRatio = 80;
 			}
 
@@ -252,7 +252,7 @@ namespace FaceFollower
 				state.Mode = MotorMode.On | MotorMode.Brake;
 				state.RunState = MotorRunState.Running;
 				state.TachoLimit = 250;
-				state.Power = Math.Sign(y) * 15;
+				state.Power = Math.Sign(y) * 20;
 				state.TurnRatio = 80;
 			}
 
