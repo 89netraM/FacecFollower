@@ -27,4 +27,4 @@ robotics for LEGO library.
 A more detailed story of this project, as well as a demonstration video, can be
 found on my blog.
 
-[**http://blog.åsberg.net/facefollower/**](http://blog.xn--sberg-lra.net/facefollower/)
+[**https://blog.åsberg.net/facefollower/**](https://blog.xn--sberg-lra.net/facefollower/)
