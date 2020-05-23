@@ -1,6 +1,6 @@
 # FaceFollower
 
-While home from university I found my LEGO MindStorm set and decided top build
+While home from university I found my LEGO MINDSTORMS set and decided top build
 something with it. Recently having been on quiet a few video calls, and
 wanting to build something useful, I came up with the idea to build a webcam
 that keeps my face in frame. A FaceFollower.
